@@ -1,17 +1,24 @@
 import os
 from paddleocr import PaddleOCR
 
-def ocr_numberplate(image_path: str) -> str:
-    """
-    번호판 이미지에서 텍스트를 인식하는 함수.
-    :param image_path: 번호판 이미지 파일 경로
-    :return: 인식된 텍스트 문자열
-    """
+def ocr_numberplate(image_path: str):
+    # PaddleOCR 객체 생성 (det_model_dir은 유효한 경로를 사용)
+    os.makedirs("dummy_det", exist_ok=True)
     rec_model_dir = r"src\utils\ocr_model"
-    ocr = PaddleOCR(det=False, rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
+
+    ocr = PaddleOCR(det=False, det_model_dir="dummy_det", rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
     
-    result = ocr.ocr(image_path, cls=False)
+    # OCR 수행
+    result = ocr.ocr(image_path, cls=True)
     
-    # 인식된 텍스트들을 하나의 문자열로 합쳐서 반환
-    recognized_text = "".join([word_info[1][0] for line in result for word_info in line])
+    # 결과가 None 또는 빈 리스트인 경우 처리
+    if not result:
+        print("OCR 결과가 없습니다.")
+        return ""
+    
+    try:
+        recognized_text = "".join([word_info[1][0] for line in result for word_info in line if word_info and word_info[1]])
+    except Exception as e:
+        print("OCR 결과 처리 중 오류 발생:", e)
+        recognized_text = ""
     return recognized_text

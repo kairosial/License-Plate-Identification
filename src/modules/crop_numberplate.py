@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 from azure.cognitiveservices.vision.customvision.prediction import CustomVisionPredictionClient
 from msrest.authentication import ApiKeyCredentials
 
-# 설정 파일 로드
+# 설정 파일 경로
 CONFIG_PATH = "config.json"
 
 def load_config(config_path):
@@ -26,7 +26,7 @@ def crop_numberplate(image_path: str, output_folder: str='data/crop', config_pat
 
     # 설정 불러오기
     config = load_config(config_path)
-    azure_cv = config["azure-cv"]  # "azure-cv" 키에 접근
+    azure_cv = config["azure-cv"]
 
     endpoint = azure_cv["endpoint"]
     prediction_key = azure_cv["prediction_key"]
@@ -43,7 +43,6 @@ def crop_numberplate(image_path: str, output_folder: str='data/crop', config_pat
     # 바운딩 박스 좌표 저장 파일
     output_txt = os.path.join(output_folder, "detections.txt")
 
-    # 결과 파일 초기화
     cropped_image_paths = []
     with open(output_txt, "w") as f:
         f.write("Filename,Tag,Probability,Left,Top,Width,Height\n")  # 헤더 추가
@@ -52,12 +51,17 @@ def crop_numberplate(image_path: str, output_folder: str='data/crop', config_pat
         with open(image_path, "rb") as image_data:
             results = predictor.detect_image(project_id, model_name, image_data)
 
+        # 만약 감지 결과가 없으면 바로 반환
+        if not results.predictions:
+            print("번호판을 감지하지 못했습니다.")
+            return []
+
         # 원본 이미지 로드
         image = Image.open(image_path)
         fig, ax = plt.subplots(1, figsize=(8, 6))
         ax.imshow(image)
 
-        base_name, ext = os.path.splitext(os.path.basename(image_path))  # 파일명과 확장자 분리
+        base_name, ext = os.path.splitext(os.path.basename(image_path))
 
         # 바운딩 박스 처리
         for idx, prediction in enumerate(results.predictions):

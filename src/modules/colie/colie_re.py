@@ -48,7 +48,7 @@ def colie_re(input_image: str, output_dir: str = "data/colie"):
         Image.fromarray(
             (torch.movedim(img_rgb, 1, -1)[0].detach().cpu().numpy() * 255).astype(np.uint8)
         ).save(output_image)
-        return
+        return output_image
     
     print("어두운 이미지로 판단되어 colie 보정을 진행합니다.")
     
