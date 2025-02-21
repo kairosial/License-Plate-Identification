@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from filter import FastGuidedFilter
+from .filter import FastGuidedFilter
 
 
 def get_image(path):

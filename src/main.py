@@ -1,6 +1,6 @@
 import os
 from modules.ocr_numberplate import ocr_numberplate  # 함수만 import
-from modules.colie import colie
+from modules.colie.colie_re import colie_re
 from modules.crop_numberplate import crop_numberplate
 
 
@@ -14,7 +14,7 @@ def main():
         return
     
     # 밝기 보정 적용 및 결과 이미지 경로 반환
-    colie_output = colie(user_image)
+    colie_output = colie_re(user_image)
 
     # 이미지 크롭하기
     crop_output_image = crop_numberplate(colie_output)
