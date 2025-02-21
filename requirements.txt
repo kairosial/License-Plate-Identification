@@ -1,0 +1,4 @@
+paddleocr==2.9.1
+paddlepaddle==2.6.1
+numpy==1.24.4
+opencv-python==4.5.5.62
