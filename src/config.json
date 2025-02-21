@@ -1,0 +1,10 @@
+{
+    "azure-cv": {
+        "endpoint": "https://6a044cv20250210-prediction.cognitiveservices.azure.com",
+        "prediction_key": "6SAcESgHgaKkf9BjA7UA9jQE5eZnuEkF79k0utnYIj4Nj8zGwgjJJQQJ99BBACYeBjFXJ3w3AAAIACOGCII7",
+        "project_id": "41cd72bd-f812-488c-b4e6-4c515f664b75",
+        "published_model_name": "Iteration1"
+    }
+
+
+}

@@ -7,7 +7,7 @@ def ocr_numberplate(image_path: str) -> str:
     :param image_path: 번호판 이미지 파일 경로
     :return: 인식된 텍스트 문자열
     """
-    rec_model_dir = r"src\modules\ocr_model"
+    rec_model_dir = r"src\utils\ocr_model"
     ocr = PaddleOCR(det=False, rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
     
     result = ocr.ocr(image_path, cls=False)
