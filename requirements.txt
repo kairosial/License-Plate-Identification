@@ -1,4 +1,6 @@
-preprocessing
-  Low Light Image Enhancement :LLIE
-  colie : https://github.com/ctom2/colie
-  requirement : python3.10, pytorch==2.3.1
+paddleocr==2.9.1
+paddlepaddle==2.6.1
+numpy==1.24.4
+opencv-python==4.5.5.62
+# colie: python==3.10
+# colie: pytorch==2.3.1
