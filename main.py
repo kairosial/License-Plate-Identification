@@ -23,7 +23,7 @@ def main():
         colie_output = user_image
     
     # 번호판 크롭 진행
-    crop_output_image = crop_numberplate(user_image)
+    crop_output_image = crop_numberplate(colie_output)
     if not crop_output_image:
         print("번호판을 감지하지 못했습니다.")
         return
