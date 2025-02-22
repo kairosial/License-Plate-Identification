@@ -4,7 +4,7 @@ from paddleocr import PaddleOCR
 def ocr_numberplate(image_path: str):
     # PaddleOCR 객체 생성 (det_model_dir은 유효한 경로를 사용)
     os.makedirs("dummy_det", exist_ok=True)
-    rec_model_dir = r"src\utils\ocr_model"
+    rec_model_dir = os.path.join("src", "utils", "ocr_model")
 
     ocr = PaddleOCR(det=False, det_model_dir="dummy_det", rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
     
@@ -12,7 +12,7 @@ def ocr_numberplate(image_path: str):
     result = ocr.ocr(image_path, cls=True)
     
     # 결과가 None 또는 빈 리스트인 경우 처리
-    if not result:
+    if not result or None in result:
         print("OCR 결과가 없습니다.")
         return ""
     
