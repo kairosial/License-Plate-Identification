@@ -6,8 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 def annotate_from_detections(
     images_folder: str,
     recognized_text: str,
-    detections_file: str = 'data/crop/detections.txt',
-    output_folder: str = 'data/output',
+    detections_file: str = os.path.join('output', 'detection', 'detections.txt'),
+    output_folder: str = os.path.join('output', 'OCR'),
     font_size: int = 32  # 원하는 폰트 크기 기본값(예: 32)
 ):
     """

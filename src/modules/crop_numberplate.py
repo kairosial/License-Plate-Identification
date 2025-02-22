@@ -7,14 +7,14 @@ from azure.cognitiveservices.vision.customvision.prediction import CustomVisionP
 from msrest.authentication import ApiKeyCredentials
 
 # 설정 파일 경로 (필요 시 수정)
-CONFIG_PATH = os.path.join('modules', 'config.json')
+CONFIG_PATH = os.path.join('src', 'modules', 'config.json')
 
 def load_config(config_path):
     """JSON 파일에서 Azure 설정값을 로드하는 함수"""
     with open(config_path, "r") as f:
         return json.load(f)
 
-def crop_numberplate(image_path: str, output_folder: str='data/crop', config_path: str = CONFIG_PATH):
+def crop_numberplate(image_path: str, output_folder: str = os.path.join('output', 'detection'), config_path: str = CONFIG_PATH):
     """
     Azure Custom Vision을 사용하여 자동차 번호판을 감지하고 크롭하는 함수.
 

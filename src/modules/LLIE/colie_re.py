@@ -8,7 +8,7 @@ from .loss import *
 from .siren import *
 from .color import *
 
-def colie_re(input_image: str, output_dir: str = "data/colie"):
+def colie_re(input_image: str, output_dir: str = os.path.join('output', 'LLIE')):
     """
     어두운 이미지를 보정하는 함수
     :param input_image: 입력 이미지 파일 경로

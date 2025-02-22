@@ -1,8 +1,8 @@
 import os
-from modules.ocr_numberplate import ocr_numberplate  # 번호판 인식 함수
-from modules.LLIE.colie_re import colie_re          # colie 보정 함수
-from modules.crop_numberplate import crop_numberplate  # 번호판 크롭 함수
-from modules.annotate_numberplate import annotate_from_detections # 번호판 주석처리리
+from src.modules.ocr_numberplate import ocr_numberplate  # 번호판 인식 함수
+from src.modules.LLIE.colie_re import colie_re          # colie 보정 함수
+from src.modules.crop_numberplate import crop_numberplate  # 번호판 크롭 함수
+from src.modules.annotate_numberplate import annotate_from_detections # 번호판 주석처리리
 
 def main():
     # 사용자로부터 이미지 파일 경로 입력 받기
@@ -23,7 +23,7 @@ def main():
         colie_output = user_image
     
     # 번호판 크롭 진행
-    crop_output_image = crop_numberplate(colie_output)
+    crop_output_image = crop_numberplate(user_image)
     if not crop_output_image:
         print("번호판을 감지하지 못했습니다.")
         return
