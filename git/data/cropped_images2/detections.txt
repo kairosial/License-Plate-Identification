@@ -1,1 +1,0 @@
-Filename,Tag,Probability,Left,Top,Width,Height

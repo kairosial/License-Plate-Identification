@@ -1,6 +1,6 @@
 import os
 from modules.ocr_numberplate import ocr_numberplate  # 번호판 인식 함수
-from modules.colie.colie_re import colie_re          # colie 보정 함수
+from modules.LLIE.colie_re import colie_re          # colie 보정 함수
 from modules.crop_numberplate import crop_numberplate  # 번호판 크롭 함수
 from modules.annotate_numberplate import annotate_from_detections # 번호판 주석처리리
 

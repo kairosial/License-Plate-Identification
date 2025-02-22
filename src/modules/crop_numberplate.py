@@ -6,8 +6,8 @@ import matplotlib.patches as patches
 from azure.cognitiveservices.vision.customvision.prediction import CustomVisionPredictionClient
 from msrest.authentication import ApiKeyCredentials
 
-# 설정 파일 경로
-CONFIG_PATH = "config.json"
+# 설정 파일 경로 (필요 시 수정)
+CONFIG_PATH = os.path.join('modules', 'config.json')
 
 def load_config(config_path):
     """JSON 파일에서 Azure 설정값을 로드하는 함수"""
@@ -25,7 +25,7 @@ def crop_numberplate(image_path: str, output_folder: str='data/crop', config_pat
     """
 
     # 설정 불러오기
-    config = load_config(config_path)
+    config = load_config(CONFIG_PATH)
     azure_cv = config["azure-cv"]
 
     endpoint = azure_cv["endpoint"]
