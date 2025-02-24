@@ -1,15 +1,22 @@
-# colie
+# LLIE(Low-Light Image Enhancement
 torch==2.3.1
 torchaudio==2.3.1
 torchvision==0.18.1
 
-#cv-azure
-pillow==11.1.0
-matplotlib==3.10.0
-azure-cognitiveservices-vision-customvision==3.1.1
-msrest==0.7.1
+# detection
+## YOLO v8 w/ ultralytics, roboflow
+ultralytics
+roboflow
+onnx
+onnxruntime
 
-#ocr
+## Azure Custom Vision
+# pillow==11.1.0
+# matplotlib==3.10.0
+# azure-cognitiveservices-vision-customvision==3.1.1
+# msrest==0.7.1
+
+# OCR
 paddleocr==2.9.1
 paddlepaddle==2.6.1
 numpy==1.24.4
