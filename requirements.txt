@@ -5,7 +5,7 @@ torchvision==0.18.1
 
 # detection
 ## YOLO v8 w/ ultralytics, roboflow
-# ultralytics
+ultralytics==8.3.78
 roboflow
 onnx
 onnxruntime
@@ -21,3 +21,11 @@ paddleocr==2.9.1
 paddlepaddle==2.6.1
 numpy==1.24.4
 opencv-python==4.5.5.62
+
+# gradio
+gradio==5.17.1
+
+
+#opencv-python==4.11.0.86
+#numpy==1.26.4
+#pillow==11.0.0

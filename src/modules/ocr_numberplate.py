@@ -11,7 +11,7 @@ def ocr_numberplate(image):
     rec_model_dir = os.path.join('src', 'utils', 'ocr_model')
     
     ocr = PaddleOCR(det=False,
-                    det_model_dir=os.path.join('src', 'dummy_det'),
+                    det_model_dir=os.path.join('src', 'dummy_det'), 
                     rec=True,
                     rec_model_dir=rec_model_dir,
                     lang="korean",
