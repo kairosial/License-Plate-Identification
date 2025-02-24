@@ -1,12 +1,13 @@
 import os
 from paddleocr import PaddleOCR
 
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def ocr_numberplate(image_path: str):
     # PaddleOCR 객체 생성 (det_model_dir은 유효한 경로를 사용)
-    os.makedirs(os.path.join('src', 'dummy_det'), exist_ok=True)
-    rec_model_dir = os.path.join('src', 'utils', 'ocr_model')
+    rec_model_dir = os.path.join(CURRENT_DIR, '..', 'utils', 'ocr_model')
 
-    ocr = PaddleOCR(det=False, det_model_dir=os.path.join('src', 'dummy_det'), rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
+    ocr = PaddleOCR(det=False, rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
     
     # OCR 수행
     result = ocr.ocr(image_path, cls=True)

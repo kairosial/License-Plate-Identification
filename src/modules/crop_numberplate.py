@@ -7,7 +7,8 @@ from azure.cognitiveservices.vision.customvision.prediction import CustomVisionP
 from msrest.authentication import ApiKeyCredentials
 
 # 설정 파일 경로 (필요 시 수정)
-CONFIG_PATH = os.path.join('src', 'modules', 'config.json')
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(CURRENT_DIR, 'config.json')
 
 def load_config(config_path):
     """JSON 파일에서 Azure 설정값을 로드하는 함수"""
