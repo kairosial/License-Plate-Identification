@@ -1,18 +1,28 @@
 import os
+import numpy as np
 from paddleocr import PaddleOCR
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-def ocr_numberplate(image_path: str):
-    # PaddleOCR 객체 생성 (det_model_dir은 유효한 경로를 사용)
-    rec_model_dir = os.path.join(CURRENT_DIR, '..', 'utils', 'ocr_model')
-
-    ocr = PaddleOCR(det=False, rec=True, rec_model_dir=rec_model_dir, lang="korean", use_gpu=True)
+def ocr_numberplate(image):
+    """
+    이미지(파일 경로가 아니라 PIL 이미지 또는 numpy 배열)를 받아서 OCR을 수행합니다.
+    """
+    # PaddleOCR 객체 생성 (det_model_dir은 유효한 경로 사용)
+    os.makedirs(os.path.join('src', 'dummy_det'), exist_ok=True)
+    rec_model_dir = os.path.join('src', 'utils', 'ocr_model')
     
-    # OCR 수행
-    result = ocr.ocr(image_path, cls=True)
+    ocr = PaddleOCR(det=False,
+                    det_model_dir=os.path.join('src', 'dummy_det'),
+                    rec=True,
+                    rec_model_dir=rec_model_dir,
+                    lang="korean",
+                    use_gpu=True)
     
-    # 결과가 None 또는 빈 리스트인 경우 처리
+    # image가 numpy 배열이 아니라면 변환
+    if not isinstance(image, np.ndarray):
+        image = np.array(image)
+    
+    result = ocr.ocr(image, cls=True)
+    
     if not result or None in result:
         print("OCR 결과가 없습니다.")
         return ""
@@ -22,4 +32,5 @@ def ocr_numberplate(image_path: str):
     except Exception as e:
         print("OCR 결과 처리 중 오류 발생:", e)
         recognized_text = ""
+    
     return recognized_text
