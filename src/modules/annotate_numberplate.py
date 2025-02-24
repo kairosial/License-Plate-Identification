@@ -1,125 +1,99 @@
 import os
-import re
-import csv
+import platform
+import numpy as np
+import cv2
 from PIL import Image, ImageDraw, ImageFont
 
+def load_custom_font(font_size=50):
+    """
+    다양한 OS 환경에서 폰트를 유연하게 로드.
+    Windows/macOS/Linux에서 사용 가능한 폰트 경로를 순차적으로 확인하고,
+    적절한 폰트를 찾아서 반환합니다.
+    만약 모든 폰트를 찾지 못하면 기본 폰트(ImageFont.load_default())를 사용합니다.
+    """
+    system_os = platform.system().lower()
+    possible_font_paths = []
+
+    # OS별로 자주 사용되는 폰트 경로들을 등록
+    if "windows" in system_os:
+        # Windows
+        possible_font_paths = [
+            r"C:\Windows\Fonts\malgun.ttf",       # 맑은 고딕
+            r"C:\Windows\Fonts\malgunbd.ttf",     # 맑은 고딕 (볼드)
+            r"C:\Windows\Fonts\gulim.ttf",        # 굴림
+            r"C:\Windows\Fonts\msgothic.ttc",     # MS 고딕
+        ]
+    elif "darwin" in system_os:
+        # macOS
+        possible_font_paths = [
+            "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+            "/Library/Fonts/NanumGothic.ttf",
+        ]
+    else:
+        # Linux (Ubuntu, CentOS, etc.)
+        possible_font_paths = [
+            "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+            "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
+            "/usr/share/fonts/truetype/nanum/NanumMyeongjo.ttf",
+        ]
+
+    # 순차적으로 시도
+    for font_path in possible_font_paths:
+        if os.path.exists(font_path):
+            try:
+                return ImageFont.truetype(font_path, font_size)
+            except Exception:
+                pass
+
+    print("사용 가능한 폰트를 찾지 못했습니다. 기본 폰트를 사용합니다.")
+    return ImageFont.load_default()
+
+
 def annotate_from_detections(
-    images_folder: str,
-    recognized_text: str,
-    detections_file: str = os.path.join('output', 'detection', 'detections.txt'),
+    image,
+    detections_info,
     output_folder: str = os.path.join('output', 'OCR'),
-    font_size: int = 32  # 원하는 폰트 크기 기본값(예: 32)
+    font_size: int = 50
 ):
     """
-    detections.txt 파일에 기록된 좌표 정보를 이용하여 원본 이미지에 바운딩 박스를 그리고,
-    각 박스 위에 OCR 인식 결과(번호판 텍스트)를 표시한 주석 이미지를 생성한 후, output_folder에 저장합니다.
-
-    :param images_folder: 원본 이미지들이 위치한 폴더 (예: "data/crop")
+    검출된 번호판 영역 정보를 이용하여 원본 이미지에 바운딩 박스와
+    OCR 인식 결과(번호판 텍스트)를 표시한 주석 이미지를 생성합니다.
+    
+    :param image: 원본 이미지 (PIL Image 객체 또는 NumPy 배열)
     :param recognized_text: OCR 인식 결과 문자열
-    :param detections_file: 예: "data/crop/detections.txt"
-    :param output_folder: 주석 이미지가 저장될 폴더 (예: "data/output")
-    :param font_size: 그릴 텍스트의 폰트 크기 (기본값=32)
-    :return: 주석 이미지 파일 경로 (성공 시), 없으면 None
+    :param crop_results: crop_numberplate 함수에서 반환한 리스트(각 항목에 "box" 키 포함)
+    :param output_folder: 주석 이미지 저장 폴더
+    :param font_size: 텍스트 폰트 크기
+    :return: 주석 이미지(PIL 객체)
     """
     os.makedirs(output_folder, exist_ok=True)
+    
+    # NumPy 배열을 PIL Image로 변환
+    if isinstance(image, np.ndarray):
+        if image.shape[2] == 3:
+            # 임의로 BGR로 가정 -> RGB 변환
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(image)
+    else:
+        # PIL 이미지인 경우, RGB 모드 보장
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+    
+    # 원본 이미지를 복사하여 주석 작업
+    annotated_image = image.copy()
+    draw = ImageDraw.Draw(annotated_image)
 
-    def draw_korean_text(draw_obj, position, text, fill="yellow",
-                         stroke_width=0, stroke_fill=None, font=None):
-        """한글 텍스트를 이미지에 그립니다."""
-        if font is None:
-            font = ImageFont.load_default()
-        x, y = position
+    # 개선된 폰트 로더 사용
+    font = load_custom_font(font_size)
 
-        # 텍스트 외곽선 그리기 (선택)
-        if stroke_width > 0 and stroke_fill:
-            offsets = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-            for ox, oy in offsets:
-                draw_obj.text((x + ox, y + oy), text, font=font, fill=stroke_fill)
-        draw_obj.text((x, y), text, font=font, fill=fill)
-
-    def clean_filename(raw_filename: str) -> str:
-        return os.path.basename(raw_filename.strip())
-
-    # --- (1) detections.txt 파싱 ---
-    detections_by_file = {}
-    with open(detections_file, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            raw_filename = row["Filename"]
-            filename = clean_filename(raw_filename)
-            tag = row["Tag"]
-            probability = float(row["Probability"])
-            left = int(row["Left"])
-            top = int(row["Top"])
-            width = int(row["Width"])
-            height = int(row["Height"])
-            if filename not in detections_by_file:
-                detections_by_file[filename] = []
-            detections_by_file[filename].append({
-                "tag": tag,
-                "probability": probability,
-                "left": left,
-                "top": top,
-                "width": width,
-                "height": height
-            })
-
-    if not detections_by_file:
-        print("detections.txt에 기록된 정보가 없습니다.")
-        return None
-
-    # --- (2) 첫 번째 이미지 사용 ---
-    filename = list(detections_by_file.keys())[0]
-    image_path = os.path.join(filename)  # images_folder가 필요하다면 os.path.join(images_folder, filename)으로 수정
-    if not os.path.exists(image_path):
-        print(f"이미지 파일 {image_path}이 존재하지 않습니다. 건너뜁니다.")
-        return None
-
-    image = Image.open(image_path).convert("RGB")
-    draw = ImageDraw.Draw(image)
-
-    # --- (3) 폰트 크기 적용 ---
-    # 원하는 폰트(맑은 고딕 등)를 설정하거나 기본 폰트를 사용
-    # Windows 맑은 고딕 예시
-    try:
-        if os.name == 'nt':
-            # Windows
-            font_path = "malgun.ttf"  # C:\Windows\Fonts\malgun.ttf가 있다면 절대경로로 지정 가능
-        else:
-            # Linux/Mac
-            font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-        font = ImageFont.truetype(font_path, font_size)
-    except Exception:
-        font = ImageFont.load_default()
-        print("지정 폰트를 로딩할 수 없어 기본 폰트를 사용합니다.")
-
-    # --- (4) 각 영역에 바운딩 박스 및 텍스트 ---
-    for idx, det in enumerate(detections_by_file[filename]):
-        left = det["left"]
-        top = det["top"]
-        w = det["width"]
-        h = det["height"]
-        box = (left, top, left + w, top + h)
-
-        # 박스 그리기
+    # 각 검출 영역에 대해 바운딩 박스와 텍스트 출력
+    for info in detections_info:
+        left, top, width, height = info["box"]
+        recognized_text = info["text"]
+        box = (left, top, left + width, top + height)
         draw.rectangle(box, outline="red", width=4)
-        # 텍스트 위치
-        text_y = top - 40 if top - 40 > 0 else top
 
-        # 텍스트 출력
-        draw_korean_text(
-            draw_obj=draw,
-            position=(left, text_y),
-            text=recognized_text,
-            fill="yellow",
-            stroke_width=10,
-            stroke_fill="black",
-            font=font
-        )
-
-    # --- (5) 결과 저장 ---
-    annotated_filename = f"{os.path.splitext(filename)[0]}_annotated.jpg"
-    annotated_path = os.path.join(output_folder, annotated_filename)
-    image.save(annotated_path)
-    print(f"주석 이미지 저장 완료: {annotated_path}")
-    return annotated_path
+        text_y = top - font_size if (top - font_size) > 0 else top
+        draw.text((left, text_y), recognized_text, font=font, fill="yellow")
+    
+    return annotated_image

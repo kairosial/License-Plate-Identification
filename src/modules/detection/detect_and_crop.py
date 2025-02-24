@@ -54,10 +54,15 @@ def detect_numberplate_bbox(image_path, model, resize=True, detection_save_dir=N
     # detection 결과 이미지(바운딩박스가 그려진 이미지) 저장
     annotated_img_np = results[0].plot()
     annotated_img = Image.fromarray(annotated_img_np)
-    os.makedirs(detection_save_dir, exist_ok=True)
+    
+    # 기존 detection_save_dir 내부에 'yymmdd_HHMMSS' 형식의 서브디렉토리 생성
+    timestamp = datetime.now().strftime('%y%m%d_%H%M%S')
+    sub_detection_folder = os.path.join(detection_save_dir, timestamp)
+    os.makedirs(sub_detection_folder, exist_ok=True)
+    
     image_basename = os.path.splitext(os.path.basename(image_path))[0]
     detection_filename = f"{image_basename}_detection.jpg"
-    detection_filepath = os.path.join(detection_save_dir, detection_filename)
+    detection_filepath = os.path.join(sub_detection_folder, detection_filename)
     annotated_img.save(detection_filepath)
     print(f"Detection result saved at: {detection_filepath}")
 
