@@ -33,13 +33,23 @@ def process_image_web(pil_image):
         print("번호판을 감지하지 못했습니다.")
         return None
 
-    # 3. 번호판 인식: 검출된 영역 중 첫 번째를 사용하여 OCR 수행
-    cropped_image = crop_results[0]["cropped_image"]
-    recognized_text = ocr_numberplate(cropped_image)
-    print(f"인식된 번호판 텍스트: {recognized_text}")
+    # 3 각 번호판마다 OCR 수행
+    # box + recognized_text 정보를 별도로 저장
+    detections_info = []
+    for i, result in enumerate(crop_results):
+        cropped_image = result["cropped_image"]  # PIL 이미지
+        text = ocr_numberplate(cropped_image)
+        print(f"번호판 {i+1} 텍스트: {text}")
+
+        # box 정보
+        left, top, width, height = result["box"]
+        detections_info.append({
+            "box": (left, top, width, height),
+            "text": text
+        })
 
     # 4. 주석 처리: 보정된 원본 이미지, OCR 텍스트, 검출 결과(바운딩 박스 정보)를 사용하여 주석 이미지 생성
-    annotated_image = annotate_from_detections(original_image, recognized_text, crop_results)
+    annotated_image = annotate_from_detections(original_image, detections_info)
     if annotated_image is None:
         print("주석 이미지 생성에 실패하였습니다.")
         return None
@@ -70,7 +80,8 @@ custom_css = """
 with gr.Blocks(css=custom_css) as demo:
     # 개인정보 확인 페이지: 아직 확인 기록이 없으면 보임
     with gr.Column() as confirm_container:
-         gr.Markdown("### 개인정보 확인")
+         gr.Markdown("<div style='text-align: center;'><H1>License Plate Identification<H1></div>")
+         gr.Markdown("### 개인정보 관련 내용")
          gr.Markdown('''  
 개인정보 보호법 제2조 1호 가목, 나목  
 1."개인정보"란 살아 있는 개인에 관한 정보로서 다음 각 목의 하나에 해당하는 정보를 말한다.  
@@ -83,7 +94,7 @@ with gr.Blocks(css=custom_css) as demo:
          
     # 메인 인터페이스: 개인정보 확인 후 보임
     with gr.Column(visible=False) as main_container:
-         gr.Markdown("## License Plate Identification")
+         gr.Markdown("<div style='text-align: center;'><H1>License Plate Identification<H1></div>")
          with gr.Row():
              input_image = gr.Image(type="numpy", label="번호판 이미지 업로드", sources="upload")
              output_image = gr.Image(type="numpy", label="주석 처리된 이미지")
@@ -100,4 +111,4 @@ with gr.Blocks(css=custom_css) as demo:
     
     confirm_button.click(fn=confirm_action, inputs=[], outputs=[confirm_container, main_container])
 
-demo.launch(share=True, server_name="0.0.0.0", server_port=7955)
+demo.launch(share=True, server_name="0.0.0.0", server_port=7956)
