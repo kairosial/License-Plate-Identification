@@ -29,9 +29,9 @@ if __name__ == "__main__":
         os.makedirs(output_dir)
     
     # data.yaml 파일 경로 (Roboflow에서 받은 YAML 파일)
-    data_yaml = '/home/azureuser/cloudfiles/code/LicensePlateDetection-3/data.yaml'
+    data_yaml = '/home/azureuser/cloudfiles/code/LicensePlateDetection-4/data.yaml'
     # 사용할 pretrained 모델 (예: yolov8m.pt)
-    model_path = 'yolov8m.pt'
+    model_path = 'yolov8l.pt'
     
     # 모델 학습 실행
     trained_model = train_yolo_model(data_yaml, model_path, output_dir, epochs=50, imgsz=640, device="0")
