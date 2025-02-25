@@ -60,8 +60,7 @@ def annotate_from_detections(
     OCR 인식 결과(번호판 텍스트)를 표시한 주석 이미지를 생성합니다.
     
     :param image: 원본 이미지 (PIL Image 객체 또는 NumPy 배열)
-    :param recognized_text: OCR 인식 결과 문자열
-    :param crop_results: crop_numberplate 함수에서 반환한 리스트(각 항목에 "box" 키 포함)
+    :param detections_info: 박스 좌표값값
     :param output_folder: 주석 이미지 저장 폴더
     :param font_size: 텍스트 폰트 크기
     :return: 주석 이미지(PIL 객체)

@@ -13,32 +13,43 @@ from src.modules.ocr_numberplate import ocr_numberplate
 from src.modules.annotate_numberplate import annotate_from_detections
 from src.modules.detection.detect_and_crop import detect_numberplates_in_image
 
-def process_image_web(pil_image):
+def process_image_web(pil_image, result_text):
+    # 프로젝트 루트를 기준으로 경로 설정 (main.py가 프로젝트 루트에 위치)
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    result_text = ""
+    # 1) 업로드한 이미지가 올바른 형식인지 확인 (이미지 파일이 아닌 경우)
     if pil_image is None:
-        return None
-
-    # 1) 원본 이미지 백업
+        return None, "이미지 파일 업로드해주세요"
+    
+    if not isinstance(pil_image, Image.Image):
+        try:
+            pil_image = Image.fromarray(pil_image)
+        except Exception:
+            return None, "이미지 파일 업로드해주세요"
+    
     if isinstance(pil_image, np.ndarray):
         # 만약 OpenCV BGR 형식이라면, BGR->RGB 변환 필요
         # 여기서는 RGB numpy라고 가정
         pil_image = Image.fromarray(pil_image)
 
-    # 2) 원본 이미지 = PIL
+    # 2) 원본 이미지 = PIL 백업
     original_image = pil_image.copy()
 
     # 3) colie 보정
     colie_corrected_image = colie_re(original_image)  # 반환이 numpy일 수도 있음
     if isinstance(colie_corrected_image, np.ndarray):
         colie_corrected_image = Image.fromarray(colie_corrected_image)
+    
     if colie_corrected_image is None:
-        print("colie 보정 실패. 원본 이미지를 사용합니다.")
+        print("밝기가 밝아 LLIE 보정 없이 원본 이미지를 사용합니다.")
         colie_corrected_image = original_image
 
     # 3) YOLO 모델 로드 (1회만 해도 되지만, 예시로 매번 로드)
-    model_path = "output/detection/model/train/weights/best.pt"
+    model_path = os.path.join(CURRENT_DIR, "output", "detection", "model", "train", "weights", "best.pt")
+    
     if not os.path.exists(model_path):
-        print(f"YOLO model not found at {model_path}")
-        return None
+        print(f"{model_path} 위치에 모델를 발견하지 못했습니다.")
+        return None, "모델 파일을 찾을 수 없습니다."
     model = YOLO(model_path)
 
     # 4) 바운딩 박스 감지 (메모리 방식)
@@ -48,8 +59,8 @@ def process_image_web(pil_image):
         resize=True  # 640x640
     )
     if len(bboxes) == 0:
-        print("번호판 감지 실패")
-        return None
+        print("차량을 감지하지 못했습니다.")
+        return None, "차량을 감지하지 못했습니다"
 
     # 5) 바운딩 박스별 OCR
     detections_info = []
@@ -63,6 +74,9 @@ def process_image_web(pil_image):
 
         print(f"[{i+1}] OCR result: {recognized_text}")
 
+        if not recognized_text or recognized_text.strip() == "":
+            return None, "차량 번호판 인식하는데에 있어 실패하였습니다."
+        
         width = x2 - x1
         height= y2 - y1
         detections_info.append({
@@ -71,18 +85,19 @@ def process_image_web(pil_image):
         })
 
     # 6) 주석 처리
-    annotated_image = annotate_from_detections(original_image, detections_info)
-    if annotated_image is None:
-        print("주석 이미지 생성 실패")
-        return None
+    annotated_result = annotate_from_detections(original_image, detections_info)
+    if annotated_result is None:
+        print("주석 이미지 생성을 실패했습니다.")
+        return None, "주석 이미지 생성에 실패하였습니다."
 
-    # 7) BGR->RGB 변환 or RGB->BGR?
-    # Gradio가 RGB numpy를 받는다면, 그냥 np.array(annotated_image) 반환해도 됨
-    #annotated_np = np.array(annotated_image)  # PIL => RGB numpy
-    # 만약 "cv2.imshow 등에서 BGR 필요"하면 다음 줄
-    #annotated_rgb = cv2.cvtColor(annotated_np, cv2.COLOR_BGR2RGB)
+    # 만약 annotate_from_detections가 tuple을 반환한다면 첫 번째 요소를 실제 이미지로 사용
+    if isinstance(annotated_result, tuple):
+        annotated_image = annotated_result[0]
+    else:
+        annotated_image = annotated_result
 
-    return annotated_image
+    result_text = "차량 번호판 인식을 성공하였습니다."
+    return annotated_image, result_text
 
 def clear_all():
     return None, None
@@ -99,40 +114,33 @@ custom_css = """
     display: flex;
     justify-content: center;
 }
+
+.centered-textbox textarea {
+    text-align: center;
+    font-size: 20px;
+    height: 40px;      
+    padding-top: 10px; 
+    padding-bottom: 2px; 
+}
 """
-
-with gr.Blocks(css=custom_css) as demo:
-    # 개인정보 확인 페이지: 아직 확인 기록이 없으면 보임
-    with gr.Column() as confirm_container:
+with gr.Blocks(css=custom_css) as demo:       
+    # 메인 인터페이스
+    with gr.Column() as main_container:
          gr.Markdown("<div style='text-align: center;'><H1>License Plate Identification<H1></div>")
-         gr.Markdown("### 개인정보 관련 내용")
-         gr.Markdown('''  
-개인정보 보호법 제2조 1호 가목, 나목  
-1."개인정보"란 살아 있는 개인에 관한 정보로서 다음 각 목의 하나에 해당하는 정보를 말한다.  
-가. 성명, 주민등록번호 및 영상 등을 통하여 개인을 알아볼 수 있는 정보  
-나. 해당 정보만으로는 특정 개인을 알아볼 수 없더라도 다른 정보와 쉽게 결합하여 알아볼 수 있는 정보. (이경우 다른 정보의 입수 가능성 등 개인을 알아보는데 소요되는 시간, 비용, 기술 등을 합리적으로 고려)  
-
-즉, 자동차등록번호는 자동차관리법에 따라 자동차에 부여된 일련번호로 일반적으로는 개인정보가 아니지만, 다른 정보와 쉽게 결합하여 개인을 알아볼 수 있는 특수한 상황에서는 개인정보에 해당할 수 없습니다.
-         ''')
-         confirm_button = gr.Button("확인")
          
-    # 메인 인터페이스: 개인정보 확인 후 보임
-    with gr.Column(visible=False) as main_container:
-         gr.Markdown("<div style='text-align: center;'><H1>License Plate Identification<H1></div>")
          with gr.Row():
              input_image = gr.Image(type="numpy", label="번호판 이미지 업로드", sources="upload")
              output_image = gr.Image(type="numpy", label="주석 처리된 이미지")
-         # 이미지를 업로드하면 바로 처리
-         input_image.change(fn=process_image_web, inputs=input_image, outputs=output_image)
+
+         with gr.Row(elem_classes="center-container"):
+            result_text = gr.Textbox(label="결과 메시지", show_label=True, lines=2, max_lines=2, elem_classes="centered-textbox")
+         # 이미지 업로드 시 process_image_web 함수 실행 (이미지와 결과 메시지를 함께 반환
+         input_image.change(fn=process_image_web, inputs=input_image, outputs=[output_image, result_text])
          with gr.Row(elem_classes="center-container"):
              clear_button = gr.Button("Clear", elem_classes="clear-button")
          clear_button.click(fn=clear_all, inputs=[], outputs=[input_image, output_image])
-         
-    # 개인정보 확인 버튼 클릭 시 처리하는 함수
-    def confirm_action():
-         # 개인정보 확인 컨테이너는 숨기고 메인 인터페이스 컨테이너를 보이도록 업데이트
-         return gr.update(visible=False), gr.update(visible=True)
-    
-    confirm_button.click(fn=confirm_action, inputs=[], outputs=[confirm_container, main_container])
+    # 개인정보 관련 사항
+    with gr.Column() as confirm_container:
+         gr.Markdown("<div style='text-align: center;'>본 서비스를 이용하는 순간, 귀하는 차량번호판 정보에 한정된 개인정보의 수집 및 활용에 대해 사전 동의한 것으로 간주됩니다.</div>")       
 
 demo.launch(share=True, server_name="0.0.0.0", server_port=7956)

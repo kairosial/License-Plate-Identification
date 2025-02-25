@@ -89,22 +89,3 @@ def detect_numberplates_in_image(image, model, resize=True):
         bboxes[:, [1, 3]] = bboxes[:, [1, 3]] * scale_y
 
     return bboxes
-
-
-# ---------------------------
-# 사용 예시 (main-like)
-if __name__ == "__main__":
-    # YOLO 모델 로딩 (예: yolov8n_numberplate.pt)
-    model = YOLO("detection/model/train/weights/best.pt")
-
-    # 예: 이미지 파일 -> PIL로 열어서 함수에 전달
-    test_img_path = "test_image.jpg"
-    pil_image = Image.open(test_img_path)
-
-    # 바운딩 박스 감지
-    bboxes = detect_numberplates_in_image(pil_image, model, resize=True)
-    if len(bboxes) > 0:
-        print("Detected bounding boxes (xyxy):")
-        print(bboxes)
-    else:
-        print("No numberplate detected.")
