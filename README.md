@@ -27,3 +27,64 @@
   <img alt="Azure" src="https://img.shields.io/badge/Azure-0089D6?style=for-the-badge&logoColor=white" />
   <img alt="Gradio" src="https://img.shields.io/badge/Gradio-F97316?style=for-the-badge&logo=gradio&logoColor=white" />
 </p>
+
+## 🧑🏻‍💻 Developers
+
+<div style="overflow-x: auto;">
+  <table align="center">
+    <tr>
+      <td align="center"><img src="https://github.com/kairosial.png" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/LioKim02.png" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/jooeun921.png" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/alice-min10.png" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/Ju-hong" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/jiiiiiiiy" style="width: 90%; height: auto;" /></td>
+      <td align="center"><img src="https://github.com/hanx0419" style="width: 90%; height: auto;" /></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://github.com/kairosial">김승연</a></td>
+      <td align="center"><a href="https://github.com/LioKim02">김일생</a></td>
+      <td align="center"><a href="https://github.com/jooeun921">박주은</a></td>
+      <td align="center"><a href="https://github.com/alice-min10">이수민</a></td>
+      <td align="center"><a href="https://github.com/Ju-hong">이주홍</a></td>
+      <td align="center"><a href="https://github.com/jiiiiiiiy">이지혜</a></td>
+      <td align="center"><a href="https://github.com/hanx0419">허한성</a></td>
+    </tr>
+    <tr>
+      <td align="center" style="min-width: 220px;">
+        <div>Project planning</div>
+        <div>Architecture design</div>
+        <div>Code integration</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>Server integration</div>
+        <div>Super-Resolution</div>
+        <div>Image transformation</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>OCR</div>
+        <div>Code integration</div>
+        <div>Presentation design</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>Object detection</div>
+        <div>Data preprocessing</div>
+        <div>Demo video</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>OCR</div>
+        <div>Azure OCR</div>
+        <div>Presentation design</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>Object detection</div>
+        <div>Data preprocessing</div>
+      </td>
+      <td align="center" style="min-width: 220px;">
+        <div>LLIE</div>
+        <div>Gradio</div>
+        <div>UI/UX</div>
+      </td>
+    </tr>
+  </table>
+</div>
