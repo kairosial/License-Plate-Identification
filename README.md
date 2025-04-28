@@ -17,7 +17,7 @@
 
 ## ⚙️ Pipeline
 
-<img src="./images/pipeline.png.png" style="width: 100%; height: auto;" />
+<img src="./images/pipeline.png" style="width: 100%; height: auto;" />
 <p>
   <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white" />
   <img alt="YOLOv8" src="https://img.shields.io/badge/YOLOv8-111F68?style=for-the-badge&logo=yolo&logoColor=white" />
